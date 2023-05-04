@@ -7,7 +7,6 @@ public static class Moogle
 
     static Moogle()
     {
-        Console.WriteLine("empezo a cargar");
         Documentos = LeerDocumentos.Leer();
         CuerpoDeVectores = new Cuerpo(Documentos);
     }
@@ -27,12 +26,6 @@ public static class Moogle
             consulta.Norma += palabra.Value * palabra.Value;
         }
         consulta.Norma = Math.Sqrt(consulta.Norma);
-
-        Console.WriteLine("QUERY");
-        foreach (var palabra in consulta.TFIDF)
-        {
-            Console.WriteLine("{0} {1}", palabra.Key, palabra.Value);
-        }
     }
 
     static List<SearchItem> EncontrarResultados(Vector consulta)
