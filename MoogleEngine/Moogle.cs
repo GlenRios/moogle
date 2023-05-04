@@ -37,7 +37,24 @@ public static class Moogle
             double relevancia = Vector.SimilitudDeCoseno(consulta, CuerpoDeVectores.Vectores[i]);
             if (relevancia != 0)
             {
-                resultados.Add(new SearchItem(Documentos[i].Titulo, "no snippet", relevancia));
+                int j = 0;
+                while (j < resultados.Count)
+                {
+                    if (resultados[j].Score > relevancia)
+                    {
+                        j++;
+                    }
+                    else break;
+                }
+
+                if (j >= resultados.Count)
+                {
+                    resultados.Add(new SearchItem(Documentos[i].Titulo, "no snippet", relevancia));
+                }
+                else
+                {
+                    resultados.Insert(j, new SearchItem(Documentos[i].Titulo, "no snippet", relevancia));
+                }
             }
         }
 
