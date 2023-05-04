@@ -1,17 +1,62 @@
 ﻿namespace MoogleEngine;
 
-
 public static class Moogle
 {
-    public static SearchResult Query(string query) {
-        // Modifique este método para responder a la búsqueda
+    static Documento[] Documentos;
+    static Cuerpo CuerpoDeVectores;
 
-        SearchItem[] items = new SearchItem[3] {
-            new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.9f),
-            new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.5f),
-            new SearchItem("Hello World", "Lorem ipsum dolor sit amet", 0.1f),
-        };
+    static Moogle()
+    {
+        Console.WriteLine("empezo a cargar");
+        Documentos = LeerDocumentos.Leer();
+        CuerpoDeVectores = new Cuerpo(Documentos);
+    }
 
-        return new SearchResult(items, query);
+    static void ProcesarConsulta(Vector consulta)
+    {
+        foreach (var palabra in consulta.TFIDF)
+        {
+            if (CuerpoDeVectores.IDF.ContainsKey(palabra.Key) && CuerpoDeVectores.IDF[palabra.Key] == 0)
+            {
+                consulta.TFIDF[palabra.Key] = 0;
+            }
+        }
+        consulta.Norma = 0;
+        foreach (var palabra in consulta.TFIDF)
+        {
+            consulta.Norma += palabra.Value * palabra.Value;
+        }
+        consulta.Norma = Math.Sqrt(consulta.Norma);
+
+        Console.WriteLine("QUERY");
+        foreach (var palabra in consulta.TFIDF)
+        {
+            Console.WriteLine("{0} {1}", palabra.Key, palabra.Value);
+        }
+    }
+
+    static List<SearchItem> EncontrarResultados(Vector consulta)
+    {
+        List<SearchItem> resultados = new List<SearchItem>();
+
+        for (int i = 0; i < Documentos.Length; i++)
+        {
+            double relevancia = Vector.SimilitudDeCoseno(consulta, CuerpoDeVectores.Vectores[i]);
+            if (relevancia != 0)
+            {
+                resultados.Add(new SearchItem(Documentos[i].Titulo, "no snippet", relevancia));
+            }
+        }
+
+        return resultados;
+    }
+
+    public static SearchResult Query(string query)
+    {
+        Vector consulta = new Vector(query);
+        ProcesarConsulta(consulta);
+        List<SearchItem> resultados = EncontrarResultados(consulta);
+
+        return new SearchResult(resultados.ToArray(), query);
     }
 }
