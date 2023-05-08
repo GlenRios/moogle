@@ -47,16 +47,37 @@ public static class Moogle
                     else break;
                 }
 
+                string snippet = "";
+                bool snippetEncontrado = false;
+                for (int k = 0; k < Documentos[i].Palabras.Length && !snippetEncontrado; k++)
+                {
+                    foreach (var palabra in consulta.TFIDF)
+                    {
+                        if (snippetEncontrado) break;
+
+                        if (palabra.Key == Documentos[i].Palabras[k] && consulta.TFIDF[palabra.Key] != 0)
+                        {
+                            int izq = Math.Max(k - 10, 0), der = Math.Min(k + 10, Documentos[i].Palabras.Length - 1);
+                            for (int s = izq; s <= der; s++)
+                            {
+                                snippet = snippet + " " + Documentos[i].Palabras[s];
+                            }
+                            snippetEncontrado = true;
+                        }
+                    }
+                }
+
                 if (j >= resultados.Count)
                 {
-                    resultados.Add(new SearchItem(Documentos[i].Titulo, "no snippet", relevancia));
+                    resultados.Add(new SearchItem(Documentos[i].Titulo, snippet, relevancia));
                 }
                 else
                 {
-                    resultados.Insert(j, new SearchItem(Documentos[i].Titulo, "no snippet", relevancia));
+                    resultados.Insert(j, new SearchItem(Documentos[i].Titulo, snippet, relevancia));
                 }
             }
         }
+
 
         return resultados;
     }
