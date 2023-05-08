@@ -29,10 +29,16 @@ public class Vector
     public Vector(string query)
     {
         this.TFIDF = new Dictionary<string, double>();
-
-        string[] palabrasQuery = query.ToLower().Split(Constantes.caracteresNoImportantes, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToArray();
+        string[] palabrasQuery = query.ToLower().Split(Constantes.caracteresNoImportantesII, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToArray();
+        List<string> PalabrasObligatorias = new List<string>();
+        List<string> PalabrasMasRelevantes = new List<string>();
+        List<string> PalabrasNoImportantes = new List<string>();
         foreach (string palabra in palabrasQuery)
         {
+            if (palabra[0] == '!' && palabra[palabra.Length - 1])
+
+                if (this.TFIDF.ContainsKey(palabra)) continue;
+
             this.TFIDF.Add(palabra, 1);
         }
     }
