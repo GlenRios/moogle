@@ -33,11 +33,33 @@ public class Vector
         List<string> PalabrasObligatorias = new List<string>();
         List<string> PalabrasMasRelevantes = new List<string>();
         List<string> PalabrasNoImportantes = new List<string>();
+        for (int i = 0; i < palabrasQuery.Length; i++)
+        {
+            string palabra = "";
+            for (int j = 0; j < palabrasQuery[i].Length; j++)
+            {
+                if (palabrasQuery[i][j] != '!' || palabrasQuery[i][j] != '*' || palabrasQuery[i][j] != '^')
+                {
+                    palabra += palabrasQuery[i][j];
+                }
+            }
+            if (palabrasQuery[i][0] == '!')
+            {
+                PalabrasNoImportantes.Add(palabra);
+            }
+            if (palabrasQuery[i][0] == '*')
+            {
+                PalabrasMasRelevantes.Add(palabra);
+            }
+            if (palabrasQuery[i][0] == '^')
+            {
+                PalabrasObligatorias.Add(palabra);
+            }
+
+        }
         foreach (string palabra in palabrasQuery)
         {
-            if (palabra[0] == '!' && palabra[palabra.Length - 1])
-
-                if (this.TFIDF.ContainsKey(palabra)) continue;
+            if (this.TFIDF.ContainsKey(palabra)) continue;
 
             this.TFIDF.Add(palabra, 1);
         }
