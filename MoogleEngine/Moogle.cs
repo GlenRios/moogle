@@ -37,48 +37,76 @@ public static class Moogle
             double relevancia = Vector.SimilitudDeCoseno(consulta, CuerpoDeVectores.Vectores[i]);
             if (relevancia != 0)
             {
-                int j = 0;
-                while (j < resultados.Count)
+                bool DocSirveI = true;
+                foreach (string palabra in consulta.PalabrasNoImportantes)
                 {
-                    if (resultados[j].Score > relevancia)
+                    if (Documentos[i].ContadorDePalabras.ContainsKey(palabra))
                     {
-                        j++;
+                        DocSirveI = false;
+                        break;
                     }
-                    else break;
+                    else continue;
                 }
 
-                string snippet = "";
-                bool snippetEncontrado = false;
-                for (int k = 0; k < Documentos[i].Palabras.Length && !snippetEncontrado; k++)
+                bool DocSirveII = true;
+                foreach (string palabra in consulta.PalabrasObligatorias)
                 {
-                    foreach (var palabra in consulta.TFIDF)
+                    if (Documentos[i].ContadorDePalabras.ContainsKey(palabra)) continue;
+                    else
                     {
-                        if (snippetEncontrado) break;
+                        DocSirveII = false;
+                        break;
+                    }
+                }
 
-                        if (palabra.Key == Documentos[i].Palabras[k] && consulta.TFIDF[palabra.Key] != 0)
+                if (DocSirveI == true && DocSirveII == true)
+                {
+                    int j = 0;
+                    while (j < resultados.Count)
+                    {
+                        if (resultados[j].Score > relevancia)
                         {
-                            int izq = Math.Max(k - 10, 0), der = Math.Min(k + 10, Documentos[i].Palabras.Length - 1);
-                            for (int s = izq; s <= der; s++)
+                            j++;
+                        }
+                        else break;
+                    }
+
+                    string snippet = "";
+                    bool snippetEncontrado = false;
+                    for (int k = 0; k < Documentos[i].Palabras.Length && !snippetEncontrado; k++)
+                    {
+                        foreach (var palabra in consulta.TFIDF)
+                        {
+                            if (snippetEncontrado) break;
+
+                            if (palabra.Key == Documentos[i].Palabras[k] && consulta.TFIDF[palabra.Key] != 0)
                             {
-                                snippet = snippet + " " + Documentos[i].Palabras[s];
+                                int izq = Math.Max(k - 10, 0), der = Math.Min(k + 10, Documentos[i].Palabras.Length - 1);
+                                for (int s = izq; s <= der; s++)
+                                {
+                                    snippet = snippet + " " + Documentos[i].Palabras[s];
+                                }
+                                snippetEncontrado = true;
                             }
-                            snippetEncontrado = true;
                         }
                     }
-                }
 
-                if (j >= resultados.Count)
-                {
-                    resultados.Add(new SearchItem(Documentos[i].Titulo, snippet, relevancia));
-                }
-                else
-                {
-                    resultados.Insert(j, new SearchItem(Documentos[i].Titulo, snippet, relevancia));
+                    if (j >= resultados.Count)
+                    {
+                        resultados.Add(new SearchItem(Documentos[i].Titulo, snippet, relevancia));
+                    }
+                    else
+                    {
+                        resultados.Insert(j, new SearchItem(Documentos[i].Titulo, snippet, relevancia));
+                    }
                 }
             }
         }
 
-
+        if (resultados.Count == 0)
+        {
+            resultados.Add(new SearchItem(" ", "No existen Documentos relacionados a su consulta", 0.9f));
+        }
         return resultados;
     }
 

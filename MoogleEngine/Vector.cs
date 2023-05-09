@@ -24,40 +24,55 @@ public class Vector
             this.Norma += palabra.Value * palabra.Value;
         }
         this.Norma = Math.Sqrt(this.Norma);
+        this.PalabrasNoImportantes = new List<string>();
+        this.PalabrasObligatorias = new List<string>();
     }
+
+    public List<string> PalabrasObligatorias;
+    public List<string> PalabrasNoImportantes;
 
     public Vector(string query)
     {
         this.TFIDF = new Dictionary<string, double>();
         string[] palabrasQuery = query.ToLower().Split(Constantes.caracteresNoImportantesII, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToArray();
-        List<string> PalabrasObligatorias = new List<string>();
-        List<string> PalabrasMasRelevantes = new List<string>();
-        List<string> PalabrasNoImportantes = new List<string>();
+        this.PalabrasObligatorias = new List<string>();
+        this.PalabrasNoImportantes = new List<string>();
         for (int i = 0; i < palabrasQuery.Length; i++)
         {
             string palabra = "";
             for (int j = 0; j < palabrasQuery[i].Length; j++)
             {
-                if (palabrasQuery[i][j] != '!' || palabrasQuery[i][j] != '*' || palabrasQuery[i][j] != '^')
+                if (palabrasQuery[i][j] == '!' || palabrasQuery[i][j] == '^' || palabrasQuery[i][j] == '*') continue;
+
+                else
                 {
                     palabra += palabrasQuery[i][j];
                 }
+
             }
             if (palabrasQuery[i][0] == '!')
             {
                 PalabrasNoImportantes.Add(palabra);
             }
-            if (palabrasQuery[i][0] == '*')
+            int k = 0;
+            while (palabrasQuery[i][k] == '*')
             {
-                PalabrasMasRelevantes.Add(palabra);
+                if (this.TFIDF.ContainsKey(palabra))
+                {
+                    this.TFIDF[palabra] = this.TFIDF[palabra] * 2;
+                }
+                else
+                {
+                    this.TFIDF.Add(palabra, 2);
+                }
+                k++;
             }
             if (palabrasQuery[i][0] == '^')
             {
                 PalabrasObligatorias.Add(palabra);
             }
-
         }
-        foreach (string palabra in palabrasQuery)
+        foreach (string palabra in query.ToLower().Split(Constantes.caracteresNoImportantes, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToArray())
         {
             if (this.TFIDF.ContainsKey(palabra)) continue;
 
